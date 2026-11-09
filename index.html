@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>BSIS Anatech — Google Data Studio Quiz</title>
+<style>
+:root{
+ --bg:#fff7f5; --surface:#ffffff; --surface2:#f7f1ef; --text:#302a2a; --muted:#756b69;
+ --accent:#b85c64; --accent2:#e9a6a9; --border:#e5d7d3; --shadow:0 18px 50px rgba(77,45,45,.12);
+ --correct:#267a4a; --correct-bg:#eaf7ef; --wrong:#b73535; --wrong-bg:#fff0f0;
+}
+[data-theme="dark"]{
+ --bg:#211b1c; --surface:#2d2526; --surface2:#382e30; --text:#fff6f4; --muted:#cbbdbc;
+ --accent:#e89aa0; --accent2:#a9666b; --border:#514547; --shadow:0 18px 50px rgba(0,0,0,.35);
+ --correct:#6fda99; --correct-bg:#183524; --wrong:#ff8e8e; --wrong-bg:#3d2222;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#ffe9e7 0,var(--bg) 38%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
+button{font:inherit}
+.app{min-height:100vh;padding:18px 14px 34px}
+.topbar{max-width:1000px;margin:0 auto 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800}
+.brand img{width:42px;height:37px;object-fit:contain;border-radius:12px}
+.brand span{letter-spacing:.2px}
+.theme-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:9px 13px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+main{max-width:1000px;margin:0 auto}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:28px;box-shadow:var(--shadow);padding:clamp(20px,4vw,42px)}
+.welcome{min-height:calc(100vh - 100px);display:grid;place-items:center}
+.hero{text-align:center;max-width:760px;margin:auto}
+.hero img{width:164px;height:144px;image-rendering:auto;display:block;margin:0 auto 12px}
+.kicker{color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.12em;font-size:.78rem}
+h1{font-size:clamp(2rem,6vw,4rem);line-height:1.02;margin:8px 0 12px}
+h2{font-size:clamp(1.3rem,3vw,2rem);line-height:1.2;margin:0 0 18px}
+.subtitle{color:var(--muted);font-size:1.02rem;max-width:650px;margin:0 auto 24px}
+.meta{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:0 0 26px}
+.pill{background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:8px 12px;color:var(--muted);font-size:.9rem}
+.primary,.secondary{border:0;border-radius:15px;padding:13px 20px;font-weight:800;cursor:pointer;transition:.2s transform,.2s opacity}
+.primary{background:var(--accent);color:white;box-shadow:0 8px 18px rgba(184,92,100,.25)}
+.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+button:hover{transform:translateY(-1px)} button:focus-visible{outline:3px solid var(--accent2);outline-offset:3px}
+.quiz-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:10px}
+.question-num{color:var(--accent);font-weight:800}
+.progress-wrap{height:9px;background:var(--surface2);border-radius:99px;overflow:hidden;border:1px solid var(--border);margin-bottom:28px}
+.progress{height:100%;background:var(--accent);width:0;transition:width .25s ease}
+.options{display:grid;gap:12px}
+.option{width:100%;text-align:left;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:15px 16px;border-radius:16px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:.18s}
+.option:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.letter{width:30px;height:30px;flex:0 0 30px;border-radius:9px;display:grid;place-items:center;background:var(--surface);font-weight:900;border:1px solid var(--border)}
+.option.correct{border-color:var(--correct);background:var(--correct-bg)}
+.option.correct .letter{background:var(--correct);color:white;border-color:var(--correct)}
+.option.wrong{border-color:var(--wrong);background:var(--wrong-bg)}
+.option.wrong .letter{background:var(--wrong);color:white;border-color:var(--wrong)}
+.feedback{margin-top:18px;padding:16px;border-radius:16px;border:1px solid var(--border);background:var(--surface2)}
+.feedback strong{display:block;margin-bottom:5px}
+.feedback.correct{border-color:var(--correct);background:var(--correct-bg)}
+.feedback.wrong{border-color:var(--wrong);background:var(--wrong-bg)}
+.next-row{display:flex;justify-content:flex-end;margin-top:18px}
+.results{text-align:center}
+.score-ring{width:170px;height:170px;border-radius:50%;display:grid;place-items:center;margin:12px auto 22px;background:conic-gradient(var(--accent) var(--score),var(--surface2) 0);position:relative}
+.score-ring::after{content:"";position:absolute;inset:13px;border-radius:50%;background:var(--surface)}
+.score-text{position:relative;z-index:1;font-size:2.1rem;font-weight:900}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.stat{padding:15px;background:var(--surface2);border:1px solid var(--border);border-radius:16px}
+.stat b{display:block;font-size:1.5rem}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:22px}
+.review-list{display:grid;gap:16px;margin-top:20px}
+.review-item{border:1px solid var(--border);border-radius:20px;padding:18px;background:var(--surface)}
+.review-item.correct{border-left:6px solid var(--correct)}
+.review-item.wrong{border-left:6px solid var(--wrong)}
+.review-q{font-weight:800;margin-bottom:10px}
+.review-choice{padding:7px 9px;border-radius:9px;color:var(--muted);font-size:.94rem}
+.review-choice.selected{font-weight:700}
+.review-choice.correct{background:var(--correct-bg);color:var(--correct)}
+.review-choice.wrong{background:var(--wrong-bg);color:var(--wrong)}
+.review-exp{margin-top:10px;color:var(--muted);font-size:.94rem}
+.hidden{display:none!important}
+.small-note{color:var(--muted);font-size:.84rem;margin-top:18px}
+@media(max-width:600px){
+ .app{padding:10px 10px 24px} .card{border-radius:20px;padding:20px 16px}
+ .topbar{margin-bottom:10px} .brand span{font-size:.9rem}
+ .quiz-head{align-items:start;flex-direction:column;gap:3px}
+ .stats{grid-template-columns:1fr}
+ .hero img{width:130px;height:auto}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><img src="assets/grizzamstudy.gif" alt="Study mascot"><span>BSIS Anatech Quiz</span></div>
+  <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle light and dark mode">🌙 Theme</button>
+</header>
+<main>
+<section id="welcome" class="card welcome">
+  <div class="hero">
+    <img src="assets/grizzamstudy.gif" alt="Study mascot">
+    <div class="kicker">Google Data Studio</div>
+    <h1>Interactive Exam Reviewer</h1>
+    <p class="subtitle">44 questions based strictly on the supplied BSIS Anatech reviewer. Answer one question at a time and get immediate feedback.</p>
+    <div class="meta"><span class="pill">44 Questions</span><span class="pill">4 Choices Each</span><span class="pill">Instant Feedback</span><span class="pill">Review + Retake</span></div>
+    <button class="primary" id="startBtn">START QUIZ</button>
+    <div class="small-note">Source basis: BSIS Anatech Exam Reviewer: Google Data Studio.</div>
+  </div>
+</section>
+
+<section id="quiz" class="card hidden" aria-live="polite">
+  <div class="quiz-head"><div class="question-num" id="qNum">Question 1 of 44</div><div id="percent">0%</div></div>
+  <div class="progress-wrap" aria-label="Quiz progress"><div class="progress" id="progress"></div></div>
+  <h2 id="question"></h2>
+  <div class="options" id="options"></div>
+  <div id="feedback" class="feedback hidden"></div>
+  <div class="next-row"><button class="primary hidden" id="nextBtn">NEXT QUESTION →</button></div>
+</section>
+
+<section id="results" class="card results hidden">
+  <img src="assets/grizzamstudy.gif" alt="Study mascot" style="width:110px;height:auto">
+  <div class="kicker">Quiz Complete</div>
+  <h1>Your Results</h1>
+  <div class="score-ring" id="scoreRing" style="--score:0%"><div class="score-text" id="scoreText">0%</div></div>
+  <h2 id="performance">Keep practicing!</h2>
+  <div class="stats">
+    <div class="stat"><span>Correct</span><b id="correctStat">0</b></div>
+    <div class="stat"><span>Incorrect</span><b id="wrongStat">0</b></div>
+    <div class="stat"><span>Total</span><b id="totalStat">44</b></div>
+  </div>
+  <div class="actions"><button class="primary" id="reviewBtn">REVIEW MY ANSWERS</button><button class="secondary" id="retakeBtn">RETAKE QUIZ</button></div>
+</section>
+
+<section id="review" class="card hidden">
+  <div class="quiz-head"><div><div class="kicker">Answer Review</div><h2 style="margin-top:5px">Your Submitted Answers</h2></div><button class="secondary" id="backResultsBtn">← RESULTS</button></div>
+  <div id="reviewList" class="review-list"></div>
+</section>
+</main>
+</div>
+
+<script>
+const QUESTIONS = [{"q": "What is the primary purpose of Google Data Studio?", "a": ["To transform, visualize, and combine data into interactive, shareable reports.", "To write server-side database code.", "To replace all spreadsheet applications.", "To create only static PDF documents."], "correct": 0, "e": "The reviewer states that Data Studio transforms, visualizes, and combines data into interactive, shareable reports."}, {"q": "What is the default access permission for a newly created Data Studio dashboard report?", "a": ["Public to everyone", "Private to the report creator (Owner)", "View-only for all organization members", "Editable by anyone with the link"], "correct": 1, "e": "A newly created report is private to its creator by default."}, {"q": "Which statement correctly compares Edit mode and View mode?", "a": ["Both modes allow structural edits.", "Edit mode consumes reports; View mode changes components.", "Edit mode lets authors add/modify components, while View mode is for consuming and interacting with reports.", "View mode is only for deleting charts."], "correct": 2, "e": "Edit mode is for authors to modify components; View mode lets users interact with published reports without structural edits."}, {"q": "What happens when a data source linked to a dashboard chart is deleted or disconnected?", "a": ["The chart automatically creates a new dataset.", "The chart displays a configuration error saying the dataset is missing or invalid.", "The chart becomes a text box.", "The dashboard is permanently deleted."], "correct": 1, "e": "The reviewer says the chart displays a configuration error when its linked dataset is missing or invalid."}, {"q": "What does a Date Range Control allow end-users to do?", "a": ["Change the dashboard's font family", "Dynamically adjust the timeframe displayed across connected charts on a page", "Lock all charts", "Export every chart to PDF"], "correct": 1, "e": "A Date Range Control lets viewers dynamically adjust the timeframe shown across connected charts."}, {"q": "When a chart's default date range is set to Auto, what does it do?", "a": ["It ignores all date controls.", "It uses today's date only.", "It inherits the date range from the page-level or report-level Date Range Control.", "It permanently fixes the date range."], "correct": 2, "e": "Auto inherits the date range set by the page-level or report-level Date Range Control."}, {"q": "What is the main use of a Drop-Down List Control?", "a": ["Filter dashboard data by selecting one or more values from a list", "Change the report owner", "Resize the dashboard canvas", "Insert an external image"], "correct": 0, "e": "A Drop-Down List filters dashboard data using selected values from a list."}, {"q": "What does an Input Box Control enable viewers to do?", "a": ["Type a text search query to filter rows in tables and charts", "Change a chart's physical size", "Create a new data source", "Lock a component"], "correct": 0, "e": "The Input Box lets viewers type a text search query that filters rows in dashboard tables and charts."}, {"q": "What does a Slider Control filter?", "a": ["Only text fields", "A numerical metric field within a selected numeric range", "Only page names", "Only image components"], "correct": 1, "e": "The Slider filters charts on a numerical metric field using a selected numeric range."}, {"q": "What does a Checkbox Control provide?", "a": ["A toggle switch for dimension criteria", "A PDF export function", "A page duplication tool", "A data blending join key"], "correct": 0, "e": "The reviewer describes Checkbox Control as a simple toggle switch for dimension criteria."}, {"q": "What is the purpose of Data Control?", "a": ["To switch the underlying Google Analytics or Search Console view without editing the report structure", "To change the dashboard's HTML code", "To permanently delete a data source", "To create reference lines"], "correct": 0, "e": "Data Control lets viewers switch the underlying Analytics or Search Console view without structural edits."}, {"q": "What does Parameter Control allow users to do?", "a": ["Input custom values into calculated field formulas across a dashboard", "Change the report password", "Export charts as images", "Move pages between reports"], "correct": 0, "e": "Parameter Control accepts custom values that can be used in calculated field formulas."}, {"q": "What are Optional Metrics used for?", "a": ["Letting viewers select alternative metrics on a chart without edit rights", "Allowing viewers to delete charts", "Changing page dimensions", "Restricting data by email only"], "correct": 0, "e": "Optional Metrics let viewers choose alternative chart metrics without needing edit rights."}, {"q": "What does Drill-Down enable?", "a": ["Navigation down hierarchical dimensions such as Country > Region > City within one chart", "Exporting all pages to CSV", "Changing the report owner", "Adding an iframe to a website"], "correct": 0, "e": "Drill-Down lets viewers navigate through hierarchical dimensions in a single chart."}, {"q": "What is Cross-Filtering?", "a": ["Clicking a chart element to automatically filter other charts on the dashboard page", "Changing the report theme", "Locking a component", "Scheduling PDF emails"], "correct": 0, "e": "Cross-Filtering uses a selected slice or bar to filter other charts on the page."}, {"q": "What is the purpose of Default Control State / Bookmarks?", "a": ["To pre-populate filter options and date ranges when viewers open the dashboard", "To hide every chart", "To delete viewer selections permanently", "To export data automatically"], "correct": 0, "e": "Default Control State / Bookmarks pre-populate filters and date ranges for viewers when the dashboard opens."}, {"q": "What does the Reset Button do?", "a": ["Clears user-applied filters and date selections and returns interactions to default settings", "Deletes the dashboard", "Changes all charts to tables", "Changes the data source owner"], "correct": 0, "e": "Reset clears user-applied filters, date selections, and interactions back to defaults."}, {"q": "What can be inserted using the Insert Menu?", "a": ["Text boxes, rectangles, lines, and external images", "Only databases", "Only formulas", "Only PDF pages"], "correct": 0, "e": "The Insert Menu is the header toolbar menu for inserting these layout elements."}, {"q": "What is the Theme and Layout Panel used for?", "a": ["Defining default colors, fonts, backgrounds, and page/report layout dimensions", "Exporting data to CSV", "Filtering by email", "Changing viewer credentials"], "correct": 0, "e": "It controls visual defaults and canvas dimensions across dashboard pages."}, {"q": "What do Display Mode settings such as Fit to width and Has margin control?", "a": ["Whether the dashboard width automatically scales to fit the viewer's screen", "Whether a report can be edited", "Whether data is blended", "Whether a chart can be deleted"], "correct": 0, "e": "Display Mode settings control how the dashboard width scales for viewers."}, {"q": "Where are Align and Distribute options found, and what do they do?", "a": ["Arrange menu; they align and evenly space multiple chart components", "Share menu; they export charts", "File menu; they delete pages", "Style tab; they schedule emails"], "correct": 0, "e": "Under Arrange, these tools align and evenly space components on the canvas grid."}, {"q": "What happens when components are grouped?", "a": ["They can be moved together, and a control filter can be restricted to charts in that group.", "They are automatically deleted.", "They become public.", "They can no longer be resized."], "correct": 0, "e": "Grouped components move together, and a filter can be restricted to affect charts in that group."}, {"q": "What do Page-Level Filters affect?", "a": ["Only charts on the specific page", "Every page in the report", "Only the report owner", "Only exported PDFs"], "correct": 0, "e": "Page-Level Filters restrict filtering to charts on that specific page."}, {"q": "What is the effect of Report-Level Components?", "a": ["They appear across every page of a multi-page report in the same position", "They appear only in View mode", "They can only be used on one chart", "They automatically export data"], "correct": 0, "e": "Report-Level Components are visible across every page in the same position."}, {"q": "What can the Report Pages Panel do?", "a": ["Reorder, add, hide, duplicate, or delete pages; duplication preserves layout and design", "Only rename the report", "Only export pages", "Only change chart colors"], "correct": 0, "e": "The panel manages pages, and duplicating a page preserves its exact layout and design structure."}, {"q": "What is the purpose of Locking Components?", "a": ["To prevent editors from accidentally selecting, moving, or resizing a component until unlocked", "To prevent viewers from filtering data", "To delete a component permanently", "To hide a page from the owner"], "correct": 0, "e": "Locking protects canvas components from accidental selection, movement, or resizing."}, {"q": "What are Image Components used for?", "a": ["Displaying company logos or background images behind visual charts", "Filtering by numerical range", "Creating calculated fields", "Changing viewer credentials"], "correct": 0, "e": "Image Components display logos or background images behind visual charts."}, {"q": "How can Page Navigation Links be created?", "a": ["Insert a text or image element, highlight it, and apply a URL link to a specific report page.", "By deleting the page first.", "By changing the data source credentials.", "By using only a slider control."], "correct": 0, "e": "The reviewer describes creating navigation links by linking a highlighted text or image element to a report page."}, {"q": "What do Conditional Formatting Rules do?", "a": ["Dynamically change text or background colors based on metric conditions or thresholds", "Change report ownership", "Create new pages automatically", "Disable all filters"], "correct": 0, "e": "Conditional formatting changes table or scorecard colors according to metric conditions or threshold rules."}, {"q": "Where are Reference Lines configured for a time series chart?", "a": ["In the Style tab, to display a constant benchmark or goal line", "In the Share menu, to export data", "In the Pages panel, to duplicate pages", "In the Data Control, to change views"], "correct": 0, "e": "Reference Lines are configured in the Style tab and can show a constant benchmark or goal."}, {"q": "What does Compact Numbers do?", "a": ["Rounds large metric values and formats them with unit abbreviations such as 1.25M", "Exports chart data to CSV", "Sorts page tabs", "Locks charts"], "correct": 0, "e": "Compact Numbers formats large values using abbreviated units, such as 1.25M."}, {"q": "What is Dynamic Table Column Sorting?", "a": ["A feature that lets viewers sort columns by clicking column headers", "A tool for changing the report theme", "A way to embed a dashboard", "A method for restricting access by email"], "correct": 0, "e": "Dynamic Table Column Sorting is enabled through chart header sort options and lets viewers sort by clicking headers."}, {"q": "What does Fullscreen Chart View allow viewers to do?", "a": ["Expand a single chart to fill the entire screen", "Delete a chart from the report", "Change the data source", "Edit all report components"], "correct": 0, "e": "The Enlarge/Full Screen option expands a single chart to fill the viewer's screen."}, {"q": "How can viewers export chart data?", "a": ["Use the chart header options in View mode and select Export to Google Sheets or CSV", "Use only the Theme and Layout Panel", "Use the Locking Components feature", "Use the Page Navigation Links feature"], "correct": 0, "e": "The reviewer says chart data can be exported to Google Sheets or CSV from chart options in View mode."}, {"q": "What is Data Blending?", "a": ["Combining data from multiple data sources using join keys within charts", "Changing the date range of one chart", "Adding a background image", "Restricting access by email"], "correct": 0, "e": "Data Blending combines multiple data sources using join keys within charts."}, {"q": "What does the Data Freshness Setting control?", "a": ["How frequently the dashboard fetches updated data from underlying sources", "How often users can edit a report", "How many pages a report can have", "How many charts can be grouped"], "correct": 0, "e": "Data Freshness controls how often updated data is fetched from underlying sources."}, {"q": "Which approach is listed for improving dashboard load performance with large datasets?", "a": ["Use data extraction, custom date ranges, and optimized caching settings", "Add more decorative images", "Disable all page navigation", "Use only public links"], "correct": 0, "e": "The reviewer identifies data extraction, custom date ranges, and optimized caching as performance optimizations."}, {"q": "What is the difference between Owner's Credentials and Viewer's Credentials?", "a": ["Owner's Credentials use the dataset owner's access; Viewer's Credentials require viewers to use their own access permissions.", "Owner's Credentials always require viewer login; Viewer's Credentials never require login.", "Both always use the viewer's credentials.", "Both always use the owner's credentials."], "correct": 0, "e": "Owner's Credentials use the dataset owner's permissions, while Viewer's Credentials require each viewer's own access permissions."}, {"q": "What does 'Filter by email address' do?", "a": ["Restricts data so individual users only see rows matching their email address", "Makes every dashboard public", "Changes chart colors by email", "Allows users to edit the report"], "correct": 0, "e": "The setting restricts data access to rows matching the user's email address."}, {"q": "How should confidential data be secured when sharing a dashboard?", "a": ["Disable link sharing and restrict access to specific email accounts or domains", "Make the dashboard public", "Give edit access to everyone", "Remove all filters"], "correct": 0, "e": "The reviewer recommends disabling link sharing and restricting access to specific accounts or domains."}, {"q": "How can a dashboard be shared with non-editing stakeholders?", "a": ["Grant Viewer access through email or a shareable link", "Give every stakeholder Owner access", "Only export a screenshot", "Only duplicate the report"], "correct": 0, "e": "Dashboards can be shared with non-editing stakeholders using Viewer access by email or link."}, {"q": "How can an interactive dashboard be embedded into a web page?", "a": ["Copy the iframe embed code from the File/Share menu and paste it into the HTML", "Take a screenshot and paste it into HTML", "Use the Reset Button", "Use a Slider Control"], "correct": 0, "e": "Embedding uses the iframe embed code available from the File/Share menu."}, {"q": "What does Scheduled Email Delivery provide?", "a": ["Recurring automated PDF snapshots with selected pages and delivery times", "Live editing access for recipients", "Automatic data-source deletion", "Only CSV exports"], "correct": 0, "e": "Scheduled Email Delivery sends automated PDF snapshots on a recurring schedule with chosen pages and times."}, {"q": "How can a multi-page report be downloaded as one file?", "a": ["Select 'Download all pages' in the download dialog", "Use Cross-Filtering", "Use the Input Box Control", "Use the Theme and Layout Panel"], "correct": 0, "e": "The reviewer specifies the 'Download all pages' option for downloading a multi-page report into one file."}];
+let quiz = [];
+let current = 0;
+let answers = [];
+let started = false;
+
+const $ = id => document.getElementById(id);
+const welcome = $('welcome'), quizEl = $('quiz'), results = $('results'), review = $('review');
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function buildQuiz() {
+  quiz = QUESTIONS.map(item => {
+    const choices = item.a.map((text, i) => ({text, correct:i===item.correct}));
+    return {...item, choices: shuffle(choices)};
+  });
+  answers = Array(quiz.length).fill(null);
+  current = 0;
+}
+function show(section) {
+  [welcome,quizEl,results,review].forEach(x=>x.classList.add('hidden'));
+  section.classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function renderQuestion() {
+  const item = quiz[current];
+  $('qNum').textContent = `Question ${current+1} of ${quiz.length}`;
+  const pct = Math.round((current/quiz.length)*100);
+  $('percent').textContent = `${pct}%`;
+  $('progress').style.width = `${(current/quiz.length)*100}%`;
+  $('question').textContent = item.q;
+  const container = $('options');
+  container.innerHTML = '';
+  $('feedback').className = 'feedback hidden';
+  $('feedback').innerHTML = '';
+  $('nextBtn').classList.add('hidden');
+  item.choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.className='option';
+    btn.type='button';
+    btn.innerHTML = `<span class="letter">${String.fromCharCode(65+i)}</span><span>${escapeHtml(choice.text)}</span>`;
+    btn.addEventListener('click', () => selectAnswer(i));
+    container.appendChild(btn);
+  });
+}
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function selectAnswer(index) {
+  if (answers[current] !== null) return;
+  const item = quiz[current];
+  answers[current] = index;
+  [...$('options').children].forEach((btn, i) => {
+    btn.disabled=true;
+    if (item.choices[i].correct) btn.classList.add('correct');
+    if (i===index && !item.choices[i].correct) btn.classList.add('wrong');
+  });
+  const correct = item.choices[index].correct;
+  const fb=$('feedback');
+  fb.className='feedback '+(correct?'correct':'wrong');
+  const correctText=item.choices.find(c=>c.correct).text;
+  fb.innerHTML = `<strong>${correct?'✓ CORRECT':'✗ INCORRECT'}</strong><div><b>Correct answer:</b> ${escapeHtml(correctText)}</div><div style="margin-top:7px">${escapeHtml(item.e)}</div>`;
+  $('nextBtn').textContent = current === quiz.length-1 ? 'VIEW RESULTS →' : 'NEXT QUESTION →';
+  $('nextBtn').classList.remove('hidden');
+}
+function startQuiz() {
+  buildQuiz(); started=true; show(quizEl); renderQuestion();
+}
+function finishQuiz() {
+  const correct=answers.reduce((n,ans,i)=>n+(ans!==null && quiz[i].choices[ans].correct?1:0),0);
+  const total=quiz.length, pct=Math.round(correct/total*100);
+  $('correctStat').textContent=correct; $('wrongStat').textContent=total-correct; $('totalStat').textContent=total;
+  $('scoreText').textContent=pct+'%'; $('scoreRing').style.setProperty('--score',pct+'%');
+  $('performance').textContent = pct>=90 ? 'Excellent work! You mastered the reviewer.' : pct>=75 ? 'Great job! A little more practice can make it even stronger.' : pct>=60 ? 'Good effort! Review the missed items and try again.' : 'Keep practicing! Use the review screen, then retake the quiz.';
+  show(results);
+}
+function renderReview() {
+  const list=$('reviewList'); list.innerHTML='';
+  quiz.forEach((item, qi) => {
+    const selected=answers[qi];
+    const isCorrect=selected!==null && item.choices[selected].correct;
+    const box=document.createElement('article');
+    box.className='review-item '+(isCorrect?'correct':'wrong');
+    box.innerHTML=`<div class="review-q">${qi+1}. ${escapeHtml(item.q)}</div>`;
+    item.choices.forEach((choice, ci)=>{
+      const d=document.createElement('div');
+      d.className='review-choice '+(choice.correct?'correct ':'')+((selected===ci&&!choice.correct)?'wrong ':'')+((selected===ci)?'selected':'');
+      const marker=selected===ci?'Your answer':'';
+      const right=choice.correct?'Correct answer':'';
+      d.textContent=`${String.fromCharCode(65+ci)}. ${choice.text} ${marker ? '— '+marker : right ? '— '+right : ''}`;
+      box.appendChild(d);
+    });
+    const ex=document.createElement('div'); ex.className='review-exp'; ex.innerHTML=`<b>Explanation:</b> ${escapeHtml(item.e)}`;
+    box.appendChild(ex); list.appendChild(box);
+  });
+  show(review);
+}
+$('startBtn').addEventListener('click', startQuiz);
+$('nextBtn').addEventListener('click', () => { if(current<quiz.length-1) { current++; renderQuestion(); } else finishQuiz(); });
+$('reviewBtn').addEventListener('click', renderReview);
+$('retakeBtn').addEventListener('click', startQuiz);
+$('backResultsBtn').addEventListener('click', () => show(results));
+
+const savedTheme=localStorage.getItem('bsis-quiz-theme');
+if(savedTheme) document.documentElement.setAttribute('data-theme',savedTheme);
+function updateThemeLabel() { $('themeBtn').textContent=document.documentElement.getAttribute('data-theme')==='dark'?'☀️ Light':'🌙 Theme'; }
+$('themeBtn').addEventListener('click',()=>{
+ const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+ document.documentElement.setAttribute('data-theme',next);
+ localStorage.setItem('bsis-quiz-theme',next);
+ updateThemeLabel();
+});
+updateThemeLabel();
+</script>
+</body>
+</html>
